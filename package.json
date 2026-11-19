@@ -1,0 +1,12 @@
+{
+  "name": "kite-settlement-preflight",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {"node": ">=22"},
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "node --test",
+    "build": "node --check src/cli.js && node --check src/check.js && node --check src/rpc.js"
+  }
+}

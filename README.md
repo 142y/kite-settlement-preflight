@@ -1,0 +1,46 @@
+# Kite Settlement Preflight
+
+Before deploying a Kite x402 payment service, check the RPC that the service
+will use. This read-only CLI checks the chain ID, bytecode at the expected
+settlement asset address and ERC-20 decimals. A testnet price configured at
+mainnet precision can be off by twelve orders of magnitude.
+
+## Run
+
+Use Node.js 22 or later. From the project root, run the following commands.
+All modules use the Node standard library.
+
+~~~sh
+npm run build
+npm test
+node src/cli.js testnet
+node src/cli.js mainnet
+~~~
+
+The default network is testnet. Set KITE_RPC_URL to check a provider used by
+your deployment, or use Node's environment file option.
+
+~~~sh
+cp .env.example .env
+node --env-file=.env src/cli.js testnet
+~~~
+
+Successful runs print JSON containing the network, EIP-155 chain ID, hex
+block height, asset address, observed decimals and deployed bytecode length.
+Exit 0 means every check passed. Exit 1 reports an RPC or asset validation
+failure to stderr. Exit 2 reports invalid CLI arguments.
+
+## Kite integration
+
+Network profiles in src/check.js target testnet pieUSD (2368, 18 decimals)
+and mainnet USDC.e (2366, 6 decimals). The program calls the configured
+provider on every run. Asset selection follows the published network table.
+[Network configuration](https://github.com/BrKDDD/kite-x402-hono/blob/main/src/networks.ts)
+
+The check trusts the RPC's view of the selected height. A reorganization
+can change that view. A successful response establishes contract presence
+and matching precision. Payment authorization, facilitator availability
+and settlement require independent verification.
+
+See [architecture and operations](docs/ARCHITECTURE.md) and
+[contribution guidelines](CONTRIBUTING.md). Licensed under Apache-2.0.

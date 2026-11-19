@@ -1,0 +1,8 @@
+{
+  "network": "testnet",
+  "chainId": 2368,
+  "block": "0x1506209",
+  "token": "0x38129cf4CE5E183eFF248F42A7D345Bb1B47621A",
+  "decimals": 18,
+  "bytecodeBytes": 5193
+}

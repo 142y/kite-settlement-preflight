@@ -1,0 +1,8 @@
+{
+  "network": "mainnet",
+  "chainId": 2366,
+  "block": "0x292251",
+  "token": "0x7aB6f3ed87C42eF0aDb67Ed95090f8bF5240149e",
+  "decimals": 6,
+  "bytecodeBytes": 1798
+}
