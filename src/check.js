@@ -3,18 +3,23 @@ export const networks = {
   mainnet: {chainId: 2366, token: '0x7aB6f3ed87C42eF0aDb67Ed95090f8bF5240149e', decimals: 6, rpc: 'https://rpc.gokite.ai'}
 };
 
+export function isHexQuantity(value) {
+  return typeof value === 'string' && /^0x(?:0|[1-9a-f][0-9a-f]*)$/i.test(value);
+}
+
 function quantity(value) {
-  if (typeof value !== 'string' || !/^0x(?:0|[1-9a-f][0-9a-f]*)$/i.test(value)) {
+  if (!isHexQuantity(value)) {
     throw new Error('RPC returned an invalid hex quantity');
   }
   return BigInt(value);
 }
 
-export async function checkSettlement(network, rpc) {
+export async function checkSettlement(network, rpc, height) {
   const {chainId, token, decimals} = networks[network];
+  if (height !== undefined) quantity(height);
   const actualChain = quantity(await rpc('eth_chainId', []));
   if (actualChain !== BigInt(chainId)) throw new Error(`Expected chain ${chainId}, received ${actualChain}`);
-  const block = await rpc('eth_blockNumber', []);
+  const block = height ?? await rpc('eth_blockNumber', []);
   quantity(block);
   const code = await rpc('eth_getCode', [token, block]);
   if (typeof code !== 'string' || !/^0x(?:[0-9a-f]{2})+$/i.test(code)) {

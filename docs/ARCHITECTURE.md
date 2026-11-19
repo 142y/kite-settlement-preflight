@@ -3,7 +3,7 @@
 src/cli.js selects the profile and translates success or failure into a
 process exit code. src/rpc.js sends JSON-RPC 2.0 requests with matching IDs
 and a ten-second deadline per request. src/check.js reads the chain ID,
-then captures a height. Both eth_getCode and the decimals() eth_call use
+then uses the supplied hex height or queries the latest height. Both eth_getCode and the decimals() eth_call use
 that height. A failed check stops the sequence.
 
 Run npm test from the project root. The tests use synthetic replies for

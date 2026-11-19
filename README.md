@@ -17,6 +17,16 @@ node src/cli.js testnet
 node src/cli.js mainnet
 ~~~
 
+To repeat a saved report, pass its hex block height after the network name:
+
+~~~sh
+node src/cli.js testnet 0x1506209
+~~~
+
+Both asset reads use this height. Historical reads require a provider
+that still serves the requested state. A missing historical state causes
+the command to fail; it never substitutes a newer block.
+
 The default network is testnet. Set KITE_RPC_URL to check a provider used by
 your deployment, or use Node's environment file option.
 
