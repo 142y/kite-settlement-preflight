@@ -12,8 +12,20 @@ export function createRpc(endpoint) {
     });
     if (!response.ok) throw new Error(`${method} returned HTTP ${response.status}`);
     const body = await response.json();
-    if (body?.jsonrpc !== '2.0' || body.id !== id || body.error || !Object.hasOwn(body, 'result')) {
-      throw new Error(`Invalid or unsuccessful RPC reply for ${method}`);
+    if (body?.jsonrpc !== '2.0' || body.id !== id || Object.hasOwn(body, 'error') === Object.hasOwn(body, 'result')) {
+      throw new Error(`Invalid RPC reply for ${method}`);
+    }
+    if (Object.hasOwn(body, 'error')) {
+      const error = body.error;
+      if (!Number.isInteger(error?.code) || typeof error.message !== 'string') {
+        throw new Error(`Invalid RPC reply for ${method}`);
+      }
+      const failure = `${method} returned RPC error ${error.code}`;
+      if (['eth_getCode', 'eth_call'].includes(method) &&
+          /missing trie node|historical state unavailable|state is not available/i.test(error.message)) {
+        throw new Error(`${failure}: state unavailable at block ${params[1]}. Retry with an archive RPC endpoint.`);
+      }
+      throw new Error(failure);
     }
     return body.result;
   };

@@ -25,7 +25,8 @@ node src/cli.js testnet 0x1506209
 
 Both asset reads use this height. Historical reads require a provider
 that still serves the requested state. A missing historical state causes
-the command to fail; it never substitutes a newer block.
+the command to fail. If the provider reports missing state, set KITE_RPC_URL
+to an archive endpoint and repeat the command at the same height.
 
 The default network is testnet. Set KITE_RPC_URL to check a provider used by
 your deployment, or use Node's environment file option.
