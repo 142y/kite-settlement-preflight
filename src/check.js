@@ -1,3 +1,5 @@
+import {createHash} from 'node:crypto';
+
 export const networks = {
   testnet: {chainId: 2368, token: '0x38129cf4CE5E183eFF248F42A7D345Bb1B47621A', decimals: 18, rpc: 'https://rpc-testnet.gokite.ai'},
   mainnet: {chainId: 2366, token: '0x7aB6f3ed87C42eF0aDb67Ed95090f8bF5240149e', decimals: 6, rpc: 'https://rpc.gokite.ai'}
@@ -28,5 +30,7 @@ export async function checkSettlement(network, rpc, height) {
   const result = await rpc('eth_call', [{to: token, data: '0x313ce567'}, block]);
   if (typeof result !== 'string' || !/^0x[0-9a-f]{64}$/i.test(result)) throw new Error('Malformed decimals() response');
   if (BigInt(result) !== BigInt(decimals)) throw new Error(`Expected ${decimals} decimals, received ${BigInt(result)}`);
-  return {network, chainId, block, token, decimals, bytecodeBytes: (code.length - 2) / 2};
+  const bytecode = Buffer.from(code.slice(2), 'hex');
+  const bytecodeSha256 = createHash('sha256').update(bytecode).digest('hex');
+  return {network, chainId, block, token, decimals, bytecodeBytes: bytecode.length, bytecodeSha256};
 }

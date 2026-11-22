@@ -41,7 +41,8 @@ for (const height of [undefined, '0x0', '0x1506209']) {
     const [status] = await once(child, 'close');
     assert.equal(status, 0);
     const token = '0x38129cf4CE5E183eFF248F42A7D345Bb1B47621A';
-    assert.deepEqual(JSON.parse(output), {network:'testnet', chainId:2368, block:height ?? '0xab', token, decimals:18, bytecodeBytes:2});
+    assert.deepEqual(JSON.parse(output), {network:'testnet', chainId:2368, block:height ?? '0xab', token, decimals:18, bytecodeBytes:2,
+      bytecodeSha256:'f3df0a62b10f205b0f29768aa3d69e777154caaa179f64aabb0a4899c666b017'});
     assert.deepEqual(calls, [
       ['eth_chainId', []], ...(height === undefined ? [['eth_blockNumber', []]] : []),
       ['eth_getCode', [token, height ?? '0xab']],
@@ -54,4 +55,14 @@ test('invalid historical height is rejected before an RPC request', async () => 
   for (const height of ['', '-1', '0x00', 'latest', '0xgg']) {
     await assert.rejects(checkSettlement('testnet', () => assert.fail('unexpected RPC'), height), /hex quantity/);
   }
+});
+
+test('fingerprints raw bytecode independently of hex case and code length', async () => {
+  const report = code => checkSettlement('testnet', method => method === 'eth_getCode' ? code : results[method]);
+  const first = await report('0x60ab');
+  const same = await report('0x60AB');
+  const changed = await report('0x60ac');
+  assert.equal(first.bytecodeSha256, same.bytecodeSha256);
+  assert.equal(first.bytecodeBytes, changed.bytecodeBytes);
+  assert.notEqual(first.bytecodeSha256, changed.bytecodeSha256);
 });

@@ -2,6 +2,8 @@
 
 ## 0.1.0 (unreleased)
 
+Include a SHA-256 fingerprint of the deployed bytecode in each successful report.
+
 Report the method and RPC error code on provider failures and suggest an archive
 endpoint when the provider reports unavailable state.
 

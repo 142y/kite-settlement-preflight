@@ -37,7 +37,11 @@ node --env-file=.env src/cli.js testnet
 ~~~
 
 Successful runs print JSON containing the network, EIP-155 chain ID, hex
-block height, asset address, observed decimals and deployed bytecode length.
+block height, asset address, observed decimals, deployed bytecode length and
+`bytecodeSha256` (lowercase SHA-256 of the raw bytes at the token address).
+Compare this field between reports for the same network and token to detect
+bytecode changes even when the length stays the same. For proxy tokens the
+fingerprint covers the proxy itself; its implementation can change independently.
 Exit 0 means every check passed. Exit 1 reports an RPC or asset validation
 failure to stderr. Exit 2 reports invalid CLI arguments.
 
