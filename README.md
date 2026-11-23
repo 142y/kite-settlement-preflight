@@ -45,6 +45,15 @@ fingerprint covers the proxy itself; its implementation can change independently
 Exit 0 means every check passed. Exit 1 reports an RPC or asset validation
 failure to stderr. Exit 2 reports invalid CLI arguments.
 
+## Checking an expected fingerprint
+
+Set `KITE_EXPECTED_BYTECODE_SHA256` to the 64-digit hex digest from a trusted
+baseline for the selected network and token. Both upper- and lowercase hex
+are accepted. An invalid value or mismatch exits with status 1. A mismatch
+reports the block and both fingerprints on stderr, so deployment jobs can
+stop and an operator can reproduce the check. Leave the variable unset to
+collect a report without comparing a baseline.
+
 ## Kite integration
 
 Network profiles in src/check.js target testnet pieUSD (2368, 18 decimals)

@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {once} from 'node:events';
-import {spawn} from 'node:child_process';
+import {spawn, spawnSync} from 'node:child_process';
 import {checkSettlement} from '../src/check.js';
 
 const decimals = '0x' + '12'.padStart(64, '0');
@@ -34,7 +34,7 @@ for (const height of [undefined, '0x0', '0x1506209']) {
     await once(server, 'listening');
     t.after(() => server.close());
     const child = spawn(process.execPath, height === undefined ? ['src/cli.js'] : ['src/cli.js', 'testnet', height], {
-      env: {...process.env, KITE_RPC_URL: 'http://127.0.0.1:' + server.address().port}
+      env: {...process.env, KITE_EXPECTED_BYTECODE_SHA256: 'f3df0a62b10f205b0f29768aa3d69e777154caaa179f64aabb0a4899c666b017', KITE_RPC_URL: 'http://127.0.0.1:' + server.address().port}
     });
     let output = '';
     child.stdout.on('data', chunk => output += chunk);
@@ -65,4 +65,24 @@ test('fingerprints raw bytecode independently of hex case and code length', asyn
   assert.equal(first.bytecodeSha256, same.bytecodeSha256);
   assert.equal(first.bytecodeBytes, changed.bytecodeBytes);
   assert.notEqual(first.bytecodeSha256, changed.bytecodeSha256);
+});
+
+test('compares configured fingerprints against the observed code', async () => {
+  const rpc = method => results[method];
+  const observed = await checkSettlement('testnet', rpc);
+  assert.deepEqual(await checkSettlement('testnet', rpc, undefined, observed.bytecodeSha256.toUpperCase()), observed);
+  await assert.rejects(checkSettlement('testnet', rpc, undefined, '0'.repeat(64)), /mismatch on testnet at block 0xab/);
+});
+
+test('malformed expected fingerprint fails before any RPC requests', async () => {
+  for (const pin of ['', '0x' + 'a'.repeat(64), 'z'.repeat(64)]) {
+    await assert.rejects(checkSettlement('testnet', () => assert.fail('unexpected RPC'), undefined, pin), /64 hex digits/);
+  }
+  const child = spawnSync(process.execPath, ['src/cli.js'], {
+    env: {...process.env, KITE_EXPECTED_BYTECODE_SHA256: 'bad', KITE_RPC_URL: 'http://127.0.0.1:1'},
+    encoding: 'utf8'
+  });
+  assert.equal(child.status, 1);
+  assert.match(child.stderr, /64 hex digits/);
+  assert.equal(child.stdout, '');
 });

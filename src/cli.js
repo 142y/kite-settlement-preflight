@@ -9,7 +9,7 @@ if (extra.length || !Object.hasOwn(networks, network) ||
 } else {
   try {
     const rpc = createRpc(process.env.KITE_RPC_URL ?? networks[network].rpc);
-    console.log(JSON.stringify(await checkSettlement(network, rpc, height), null, 2));
+    console.log(JSON.stringify(await checkSettlement(network, rpc, height, process.env.KITE_EXPECTED_BYTECODE_SHA256), null, 2));
   } catch (error) {
     console.error(`Preflight failed: ${error.message}`);
     process.exitCode = 1;

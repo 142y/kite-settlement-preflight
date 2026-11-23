@@ -16,9 +16,13 @@ function quantity(value) {
   return BigInt(value);
 }
 
-export async function checkSettlement(network, rpc, height) {
+export async function checkSettlement(network, rpc, height, expectedSha256) {
   const {chainId, token, decimals} = networks[network];
   if (height !== undefined) quantity(height);
+  if (expectedSha256 !== undefined &&
+      (typeof expectedSha256 !== 'string' || !/^[0-9a-f]{64}$/i.test(expectedSha256))) {
+    throw new Error('Expected bytecode SHA-256 must contain 64 hex digits');
+  }
   const actualChain = quantity(await rpc('eth_chainId', []));
   if (actualChain !== BigInt(chainId)) throw new Error(`Expected chain ${chainId}, received ${actualChain}`);
   const block = height ?? await rpc('eth_blockNumber', []);
@@ -32,5 +36,8 @@ export async function checkSettlement(network, rpc, height) {
   if (BigInt(result) !== BigInt(decimals)) throw new Error(`Expected ${decimals} decimals, received ${BigInt(result)}`);
   const bytecode = Buffer.from(code.slice(2), 'hex');
   const bytecodeSha256 = createHash('sha256').update(bytecode).digest('hex');
+  if (expectedSha256 !== undefined && bytecodeSha256 !== expectedSha256.toLowerCase()) {
+    throw new Error(`Bytecode SHA-256 mismatch on ${network} at block ${block}: expected ${expectedSha256}, received ${bytecodeSha256}`);
+  }
   return {network, chainId, block, token, decimals, bytecodeBytes: bytecode.length, bytecodeSha256};
 }

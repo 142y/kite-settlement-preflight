@@ -2,6 +2,8 @@
 
 ## 0.1.0 (unreleased)
 
+Support an optional expected bytecode fingerprint for deployment checks.
+
 Include a SHA-256 fingerprint of the deployed bytecode in each successful report.
 
 Report the method and RPC error code on provider failures and suggest an archive
