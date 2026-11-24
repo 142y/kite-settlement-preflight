@@ -20,8 +20,11 @@ for (const [method, value, message] of [
   });
 }
 
-for (const height of [undefined, '0x0', '0x1506209']) {
-  test(`CLI reads the token at ${height ?? 'the current height'} over HTTP`, async t => {
+for (const [input, height] of [
+  [undefined, undefined], ['0x0', '0x0'], ['0x1506209', '0x1506209'],
+  ['0', '0x0'], ['171', '0xab'], ['9007199254740993', '0x20000000000001']
+]) {
+  test(`CLI reads the token at ${input ?? 'the current height'} over HTTP`, async t => {
     const calls = [];
     const server = createServer(async (req, res) => {
       const chunks = [];
@@ -33,7 +36,7 @@ for (const height of [undefined, '0x0', '0x1506209']) {
     server.listen(0, '127.0.0.1');
     await once(server, 'listening');
     t.after(() => server.close());
-    const child = spawn(process.execPath, height === undefined ? ['src/cli.js'] : ['src/cli.js', 'testnet', height], {
+    const child = spawn(process.execPath, input === undefined ? ['src/cli.js'] : ['src/cli.js', 'testnet', input], {
       env: {...process.env, KITE_EXPECTED_BYTECODE_SHA256: 'f3df0a62b10f205b0f29768aa3d69e777154caaa179f64aabb0a4899c666b017', KITE_RPC_URL: 'http://127.0.0.1:' + server.address().port}
     });
     let output = '';
@@ -85,4 +88,12 @@ test('malformed expected fingerprint fails before any RPC requests', async () =>
   assert.equal(child.status, 1);
   assert.match(child.stderr, /64 hex digits/);
   assert.equal(child.stdout, '');
+});
+
+test('CLI rejects ambiguous and fractional block numbers', () => {
+  for (const input of ['01', '1.5', '-10', '1e3']) {
+    const child = spawnSync(process.execPath, ['src/cli.js', 'testnet', input], {encoding: 'utf8'});
+    assert.equal(child.status, 2);
+    assert.match(child.stderr, /Usage/);
+  }
 });

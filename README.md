@@ -17,10 +17,11 @@ node src/cli.js testnet
 node src/cli.js mainnet
 ~~~
 
-To repeat a saved report, pass its hex block height after the network name:
+To repeat a saved report, pass its hex block height or the equivalent decimal number from a block explorer:
 
 ~~~sh
 node src/cli.js testnet 0x1506209
+node src/cli.js testnet 22045193
 ~~~
 
 Both asset reads use this height. Historical reads require a provider

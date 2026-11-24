@@ -2,6 +2,8 @@
 
 ## 0.1.0 (unreleased)
 
+Accept decimal explorer block heights in the CLI and normalize them to hex for RPC reads.
+
 Support an optional expected bytecode fingerprint for deployment checks.
 
 Include a SHA-256 fingerprint of the deployed bytecode in each successful report.
