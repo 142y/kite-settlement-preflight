@@ -1,17 +1,27 @@
-export function createRpc(endpoint) {
+export function createRpc(endpoint, timeoutMs = 10000) {
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 2147483647) {
+    throw new RangeError('RPC timeout must be an integer from 1 to 2147483647 milliseconds');
+  }
   const url = new URL(endpoint);
   if (!['https:', 'http:'].includes(url.protocol)) throw new Error('RPC URL requires HTTP or HTTPS');
   let sequence = 0;
   return async (method, params) => {
     const id = ++sequence;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {'content-type': 'application/json'},
-      body: JSON.stringify({jsonrpc: '2.0', id, method, params}),
-      signal: AbortSignal.timeout(10000)
-    });
-    if (!response.ok) throw new Error(`${method} returned HTTP ${response.status}`);
-    const body = await response.json();
+    const signal = AbortSignal.timeout(timeoutMs);
+    let body;
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify({jsonrpc: '2.0', id, method, params}),
+        signal
+      });
+      if (!response.ok) throw new Error(`${method} returned HTTP ${response.status}`);
+      body = await response.json();
+    } catch (error) {
+      if (signal.aborted) throw new Error(`${method} timed out after ${timeoutMs} ms`, {cause: error});
+      throw error;
+    }
     if (body?.jsonrpc !== '2.0' || body.id !== id || Object.hasOwn(body, 'error') === Object.hasOwn(body, 'result')) {
       throw new Error(`Invalid RPC reply for ${method}`);
     }

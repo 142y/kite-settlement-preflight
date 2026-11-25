@@ -24,3 +24,21 @@ test('distinguishes unavailable state, other RPC errors and malformed replies', 
     await assert.rejects(rpc('eth_getCode', []), {message: 'Invalid RPC reply for eth_getCode'});
   }
 });
+
+test('rejects timeouts outside the Node timer range', () => {
+  for (const value of [0, -1, 1.5, NaN, Infinity, 2147483648]) {
+    assert.throws(() => createRpc('http://localhost', value), /RPC timeout/);
+  }
+});
+
+test('reports the RPC method and deadline when the response body stalls', async t => {
+  const server = createServer((req, res) => {
+    res.writeHead(200, {'content-type': 'application/json'});
+    res.write('{');
+  });
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  t.after(() => { server.closeAllConnections(); server.close(); });
+  const rpc = createRpc('http://127.0.0.1:' + server.address().port, 100);
+  await assert.rejects(rpc('eth_chainId', []), {message: 'eth_chainId timed out after 100 ms'});
+});

@@ -46,6 +46,11 @@ fingerprint covers the proxy itself; its implementation can change independently
 Exit 0 means every check passed. Exit 1 reports an RPC or asset validation
 failure to stderr. Exit 2 reports invalid CLI arguments.
 
+Set `KITE_RPC_TIMEOUT_MS` to change the deadline for each RPC request,
+including the response body. The default is 10000 milliseconds. For example,
+`KITE_RPC_TIMEOUT_MS=3000 node src/cli.js testnet` gives each call three seconds.
+A timeout names the method on stderr and exits with status 1.
+
 ## Checking an expected fingerprint
 
 Set `KITE_EXPECTED_BYTECODE_SHA256` to the 64-digit hex digest from a trusted

@@ -2,6 +2,8 @@
 
 ## 0.1.0 (unreleased)
 
+Make the per-request RPC deadline configurable and identify timed-out methods.
+
 Accept decimal explorer block heights in the CLI and normalize them to hex for RPC reads.
 
 Support an optional expected bytecode fingerprint for deployment checks.

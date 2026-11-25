@@ -11,7 +11,9 @@ if (extra.length || !Object.hasOwn(networks, network) ||
   process.exitCode = 2;
 } else {
   try {
-    const rpc = createRpc(process.env.KITE_RPC_URL ?? networks[network].rpc);
+    const timeout = process.env.KITE_RPC_TIMEOUT_MS;
+    const rpc = createRpc(process.env.KITE_RPC_URL ?? networks[network].rpc,
+      timeout === undefined ? undefined : Number(timeout));
     console.log(JSON.stringify(await checkSettlement(network, rpc, height, process.env.KITE_EXPECTED_BYTECODE_SHA256), null, 2));
   } catch (error) {
     console.error(`Preflight failed: ${error.message}`);
