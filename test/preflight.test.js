@@ -97,3 +97,14 @@ test('CLI rejects ambiguous and fractional block numbers', () => {
     assert.match(child.stderr, /Usage/);
   }
 });
+
+test('reports a code mismatch before querying decimals on the unexpected contract', async () => {
+  const methods = [];
+  const rpc = method => {
+    methods.push(method);
+    if (method === 'eth_call') throw new Error('decimals() unavailable');
+    return results[method];
+  };
+  await assert.rejects(checkSettlement('testnet', rpc, '0xab', '0'.repeat(64)), /SHA-256 mismatch/);
+  assert.deepEqual(methods, ['eth_chainId', 'eth_getCode']);
+});

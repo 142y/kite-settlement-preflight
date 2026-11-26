@@ -31,13 +31,13 @@ export async function checkSettlement(network, rpc, height, expectedSha256) {
   if (typeof code !== 'string' || !/^0x(?:[0-9a-f]{2})+$/i.test(code)) {
     throw new Error(`Missing or malformed token bytecode at block ${block}`);
   }
-  const result = await rpc('eth_call', [{to: token, data: '0x313ce567'}, block]);
-  if (typeof result !== 'string' || !/^0x[0-9a-f]{64}$/i.test(result)) throw new Error('Malformed decimals() response');
-  if (BigInt(result) !== BigInt(decimals)) throw new Error(`Expected ${decimals} decimals, received ${BigInt(result)}`);
   const bytecode = Buffer.from(code.slice(2), 'hex');
   const bytecodeSha256 = createHash('sha256').update(bytecode).digest('hex');
   if (expectedSha256 !== undefined && bytecodeSha256 !== expectedSha256.toLowerCase()) {
     throw new Error(`Bytecode SHA-256 mismatch on ${network} at block ${block}: expected ${expectedSha256}, received ${bytecodeSha256}`);
   }
+  const result = await rpc('eth_call', [{to: token, data: '0x313ce567'}, block]);
+  if (typeof result !== 'string' || !/^0x[0-9a-f]{64}$/i.test(result)) throw new Error('Malformed decimals() response');
+  if (BigInt(result) !== BigInt(decimals)) throw new Error(`Expected ${decimals} decimals, received ${BigInt(result)}`);
   return {network, chainId, block, token, decimals, bytecodeBytes: bytecode.length, bytecodeSha256};
 }
