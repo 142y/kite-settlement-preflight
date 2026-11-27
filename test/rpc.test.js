@@ -42,3 +42,18 @@ test('reports the RPC method and deadline when the response body stalls', async 
   const rpc = createRpc('http://127.0.0.1:' + server.address().port, 100);
   await assert.rejects(rpc('eth_chainId', []), {message: 'eth_chainId timed out after 100 ms'});
 });
+
+test('identifies the method on invalid JSON without echoing provider content', async t => {
+  let content = '';
+  const server = createServer((req, res) => res.end(content));
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  t.after(() => server.close());
+  const rpc = createRpc('http://127.0.0.1:' + server.address().port);
+  for (const body of ['', '<html>provider login page</html>', '{"result":']) {
+    content = body;
+    await assert.rejects(rpc('eth_chainId', []), {
+      message: 'eth_chainId returned invalid JSON. Check that KITE_RPC_URL points to a JSON-RPC endpoint.'
+    });
+  }
+});

@@ -2,6 +2,8 @@
 
 ## 0.1.0 (unreleased)
 
+Identify the failing method when an RPC endpoint returns an empty or non-JSON body.
+
 Check the configured bytecode fingerprint before querying token decimals.
 
 Make the per-request RPC deadline configurable and identify timed-out methods.

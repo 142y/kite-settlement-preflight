@@ -20,6 +20,9 @@ export function createRpc(endpoint, timeoutMs = 10000) {
       body = await response.json();
     } catch (error) {
       if (signal.aborted) throw new Error(`${method} timed out after ${timeoutMs} ms`, {cause: error});
+      if (error instanceof SyntaxError) {
+        throw new Error(`${method} returned invalid JSON. Check that KITE_RPC_URL points to a JSON-RPC endpoint.`);
+      }
       throw error;
     }
     if (body?.jsonrpc !== '2.0' || body.id !== id || Object.hasOwn(body, 'error') === Object.hasOwn(body, 'result')) {
