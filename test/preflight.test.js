@@ -108,3 +108,15 @@ test('reports a code mismatch before querying decimals on the unexpected contrac
   await assert.rejects(checkSettlement('testnet', rpc, '0xab', '0'.repeat(64)), /SHA-256 mismatch/);
   assert.deepEqual(methods, ['eth_chainId', 'eth_getCode']);
 });
+
+test('both help flags print usage before loading RPC configuration', () => {
+  for (const flag of ['--help', '-h']) {
+    const result = spawnSync(process.execPath, ['src/cli.js', flag], {
+      encoding: 'utf8', env: {...process.env, KITE_RPC_URL: 'invalid URL'},
+    });
+    assert.equal(result.status, 0);
+    assert.equal(result.stderr, '');
+    assert.match(result.stdout, /KITE_EXPECTED_BYTECODE_SHA256/);
+    assert.match(result.stdout, /decimal-or-hex-block-height/);
+  }
+});

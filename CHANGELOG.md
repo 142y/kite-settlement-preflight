@@ -2,6 +2,8 @@
 
 ## 0.1.0 (unreleased)
 
+Add offline CLI help with supported arguments, environment variables and exit codes.
+
 Identify the failing method when an RPC endpoint returns an empty or non-JSON body.
 
 Check the configured bytecode fingerprint before querying token decimals.

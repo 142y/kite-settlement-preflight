@@ -11,6 +11,7 @@ Use Node.js 22 or later. From the project root, run the following commands.
 All modules use the Node standard library.
 
 ~~~sh
+node src/cli.js --help
 npm run build
 npm test
 node src/cli.js testnet
